@@ -1,0 +1,14 @@
+GET http://localhost:5085/games
+
+###
+GET http://localhost:5085/games/1
+###
+POST http://localhost:5085/games
+Content-Type: application/json
+
+{
+  "name": "Minecraft",
+  "genre": "Survival",
+  "price": 10.0,
+  "releaseDate": "2020-01-01"
+}
