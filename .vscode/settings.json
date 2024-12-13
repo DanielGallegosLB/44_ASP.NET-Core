@@ -1,3 +1,9 @@
 {
-    "dotnet.defaultSolution": "GameStore.sln"
+    "dotnet.defaultSolution": "GameStore.sln",
+    "editor.formatOnSave": true,
+    "editor.wordWrap": "on",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit",
+      "source.addMissingImports": "explicit"
+    },
 }

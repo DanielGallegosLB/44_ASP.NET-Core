@@ -2,15 +2,16 @@ using GameStore.Api.Dtos;
 
 namespace GameStore.Api.Endpoints;
 
-    public static class GamesEndpoints{
-        const string GetGameEndpointName = "GetGame";
+public static class GamesEndpoints
+{
+    const string GetGameEndpointName = "GetGame";
 
-private static readonly List<GamesDto> games = [
-    new (
+    private static readonly List<GamesDto> games = [
+        new (
         1,
         "The Legend of Zelda: Breath of the Wild",
         "Action-adventure",
-        59.99m, 
+        59.99m,
         new DateOnly(2017, 3, 3)
     ),
     new (
@@ -28,23 +29,29 @@ private static readonly List<GamesDto> games = [
         new DateOnly(2017, 4, 28)
     )];
 
-    public static void MapGamesEndpoints(this WebApplication app){
+    public static RouteGroupBuilder MapGamesEndpoints(this WebApplication app)
+    {
+        var group = app.MapGroup("games")
+        .WithParameterValidation();
+
         // GET
-        app.MapGet("/games", () => games);
+        group.MapGet("/", () => games);
 
         // GET by ID
-        app.MapGet("/games/{id}", (int id) => games.FirstOrDefault(g => g.Id == id) is GamesDto game ? Results.Ok(game) : Results.NotFound())
+        group.MapGet("/{id}", (int id) => games.FirstOrDefault(g => g.Id == id) is GamesDto game ? Results.Ok(game) : Results.NotFound())
         .WithName(GetGameEndpointName);
 
         // POST Create Game 
-        app.MapPost("/games", (CreateGameDto game) => {
-            var newGame = new GamesDto(games.Count + 1, game.Name, game.Genre, game.Price, game.ReleaseDate);
-            games.Add(newGame);
-            return Results.CreatedAtRoute(GetGameEndpointName, new { id = newGame.Id }, newGame);
+        group.MapPost("/", (CreateGameDto newGame) =>
+        {
+
+            var game = new GamesDto(games.Count + 1, newGame.Name, newGame.Genre, newGame.Price, newGame.ReleaseDate);
+            games.Add(game);
+            return Results.CreatedAtRoute(GetGameEndpointName, new { id = game.Id }, game);
         });
 
         // PUT /games
-        app.MapPut("games/{id}", (int id, UpdateGameDto updatedGame) =>
+        group.MapPut("/{id}", (int id, UpdateGameDto updatedGame) =>
         {
             var index = games.FindIndex(game => game.Id == id);
 
@@ -63,5 +70,21 @@ private static readonly List<GamesDto> games = [
 
             return Results.Ok(games[index]);
         });
-    
-    }};
+        // DELETE /games/1
+
+        group.MapDelete("/{id}", (int id) =>
+        {
+            var game = games.FirstOrDefault(g => g.Id == id);
+            if (game is null)
+            {
+                return Results.NotFound();
+            }
+
+            games.Remove(game);
+            return Results.NoContent();
+        });
+
+        return group;
+
+    }
+};
